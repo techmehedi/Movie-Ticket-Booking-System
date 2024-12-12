@@ -37,5 +37,12 @@ public class Showtime {
         String sql = "SELECT SeatingCapacity from theaters where TheaterID = (SELECT TheaterID from showtimes where ShowtimeID = ?)";
         return db.getSeatingCapacity(sql, showtime);
     }
-
+    
+    
+    public void deleteShowing(int showtimeID) {
+    	String sql = "DELETE FROM bookings Where ShowtimeID = " + showtimeID;
+    	db.deleteTableEntry(sql);
+    	sql = "DELETE FROM Showtimes Where ShowtimeID = " + showtimeID;
+    	db.deleteTableEntry(sql);
+    }
 }

@@ -16,7 +16,7 @@ public class DatabaseOperation {
     static final String DB_URL = "jdbc:mysql://localhost:3306";
     static String USER;
     static String PASS;
-
+    
     static {
         try (InputStream input = DatabaseOperation.class.getClassLoader().getResourceAsStream("config.properties")) {
             if (input == null) {
@@ -30,17 +30,87 @@ public class DatabaseOperation {
             e.printStackTrace();
         }
     }
-    
     public Connection connectToDatabase(){
         Connection conn = null;
         try{
             conn = DriverManager.getConnection(DB_URL, USER, PASS);
+			Statement statement = conn.createStatement();
+			statement.executeUpdate("USE MovieTicket");
         }catch (Exception e){
             System.out.println(e);
         }
         return conn;
     }
-
+    public void CreateTable(String tableName, String... tableColumns) {
+    	try {
+	    	Connection conn = connectToDatabase();
+	    	Statement statement = conn.createStatement();
+	    	boolean TableDoesNotExist = statement.execute("SELECT * FROM information_schema.tables WHERE Table_schema = 'movieticket' AND Table_name = '" + tableName + "' ");
+	    	if(TableDoesNotExist) {
+		    	StringBuilder sBuilder = new StringBuilder();
+		    	sBuilder.append("CREATE TABLE " + tableName + " (");
+		    	for (String columns : tableColumns) {
+		    		sBuilder.append(columns + ", ");
+		    	}
+		    	sBuilder.setLength(sBuilder.length() - 2);
+		    	sBuilder.append(" );");
+		    	String sqlStatement = sBuilder.toString();
+		    	statement.executeUpdate(sqlStatement);
+		    	System.out.println("Creating Table " + tableName);
+	    	}
+    	} catch (SQLException e){
+    		e.printStackTrace();
+    	}
+    }
+    
+    public void initializeDatabase() {
+    	try{
+    		Connection conn = connectToDatabase();
+ 			Statement statement = conn.createStatement();
+ 			statement.executeUpdate("CREATE DATABASE IF NOT EXISTS MovieTicket;");
+ 			statement.executeUpdate("USE MovieTicket");
+ 			CreateTable("Users", "UserID INT AUTO_INCREMENT", 
+ 					"Username VARCHAR(255)" , 
+ 					"Password VARCHAR(255)", 
+ 					"Name VARCHAR(255)", 
+ 					"Phone VARCHAR(15)", 
+ 					"Address VARCHAR(255)", 
+ 					"PRIMARY KEY (UserID)");
+ 	 			CreateTable("Admins", "AdminID INT AUTO_INCREMENT", 
+ 	 					"Username VARCHAR(255)", 
+ 	 					"Password VARCHAR(255)", 
+ 	 					"PRIMARY KEY (AdminID)");
+ 	 			CreateTable("Theaters", "TheaterID INT AUTO_INCREMENT", 
+ 	 					"Location VARCHAR(255)", 
+ 	 					"SeatingCapacity INT", 
+ 	 					"PRIMARY KEY (TheaterID)");
+ 	 			CreateTable("Movies", "MovieID INT AUTO_INCREMENT",
+ 	 					"Title VARCHAR(255)",
+ 	 					"Genre VARCHAR(255)",
+ 	 					"Rating DECIMAL(3,2)",
+ 	 					"Duration INT",
+ 	 					"Synopsis TEXT",
+ 	 					"PRIMARY KEY (MovieID)");
+ 	 			CreateTable("Showtimes", "ShowtimeID INT AUTO_INCREMENT",
+ 	 					"MovieID INT",
+ 	 					"TheaterID INT",
+ 	 					"Showtime DATETIME",
+ 	 					"PRIMARY KEY (ShowtimeID)",
+ 	 					"FOREIGN KEY (MovieID) REFERENCES Movies(MovieID)",
+ 	 					"FOREIGN KEY (TheaterID) REFERENCES Theaters(TheaterID)");
+ 	 			CreateTable("Bookings", "BookingID INT AUTO_INCREMENT",
+ 	 					"UserID INT",
+ 	 					"ShowtimeID INT",
+ 	 					"SelectedSeats INT",
+ 	 					"PaymentStatus BOOLEAN",
+ 	 					"PRIMARY KEY (BookingID)",
+ 	 					"FOREIGN KEY (UserID) REFERENCES Users(UserID)",
+ 	 					"FOREIGN KEY (ShowtimeID) REFERENCES Showtimes(ShowtimeID)");
+    	} catch (SQLException e) {
+    		e.printStackTrace();
+    	}
+    }
+    
     public int executeUpdate(String sql,Object[] values){
         int rowsAffected = 0;
         try(Connection conn = connectToDatabase();
@@ -207,5 +277,14 @@ public class DatabaseOperation {
         }
 
         return userID;
+    }
+    
+    public void deleteTableEntry(String sql) {
+    	try(Connection conn = connectToDatabase();
+                PreparedStatement ps = conn.prepareStatement(sql)){
+    			ps.executeUpdate();
+    	} catch (SQLException e) {
+			e.printStackTrace();
+		}
     }
 }

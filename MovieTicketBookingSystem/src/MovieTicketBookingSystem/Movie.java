@@ -35,5 +35,9 @@ public class Movie {
             System.out.println("-----------------------------");
         }
     }
+    
+    public void deleteMovie() {
+    	
+    }
 
 }

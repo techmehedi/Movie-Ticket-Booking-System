@@ -11,7 +11,7 @@ public class Admin extends User{
     int choice,userID;
     String title, genre,synopsis;
     double rating;
-    int duration,movieid,theaterid,showmtime_hour,showtime_min;
+    int duration,movieid,theaterid,showmtime_hour,showtime_min, showtimeid;
     Timestamp showtime;
 
     //Objects of different classes
@@ -32,12 +32,13 @@ public class Admin extends User{
             System.out.println("Press 2 to see all movies.");
             System.out.println("Press 3 to put a movie up for showtime.");
             System.out.println("Press 4 to see all showtimes.");
-            System.out.println("Press 5 to add theaters.");
-            System.out.println("Press 6 to see all theaters.");
-            System.out.println("Press 7 to book a ticket");
-            System.out.println("Press 8 to see ticket bookings");
-            System.out.println("Press 9 to cancel ticket booking");
-            System.out.println("Press 10 to exit.");
+            System.out.println("Press 5 to delete a showtime");
+            System.out.println("Press 6 to add theaters.");
+            System.out.println("Press 7 to see all theaters.");
+            System.out.println("Press 8 to book a ticket");
+            System.out.println("Press 9 to see ticket bookings");
+            System.out.println("Press 10 to cancel ticket booking");
+            System.out.println("Press 11 to exit.");
             System.out.print("Enter your choice:");
             choice = sc.nextInt();
             switch(choice){
@@ -80,6 +81,12 @@ public class Admin extends User{
                     st.showShowtimes();
                     break;
                 case 5:
+                //delete showtime by ID
+                	System.out.println("Enter Showtime ID");
+                	showtimeid = sc.nextInt();
+                	st.deleteShowing(showtimeid);
+                	break;
+                case 6:
                 //add theaters
                     System.out.println("Enter theater location:");
                     String address = sc.nextLine();
@@ -88,30 +95,29 @@ public class Admin extends User{
                     int seating_capacity = sc.nextInt();
                     t.insertTheater(address, seating_capacity);
                     break;
-                case 6:
+                case 7:
                 //see all theaters
                     t.showTheaters();
                     break;
-                case 7:
+                case 8:
                 //book a ticket
                     userID = takeUserID();
                     b.bookTicket(userID);
                     break;
 
-                case 8:
+                case 9:
                 //see ticket bookings
                     userID = takeUserID();
                     b.seeTicket(userID);
                     break;
-                case 9:
+                case 10:
                 //cancel ticket booking
                     userID = takeUserID();
                     b.cancelTicket(userID);
                     break;
-                case 10:
+                case 11:
                 //terminate the program
-                    System.exit(0);
-                    break;
+                    return;
                 default:
                     System.out.println("Wrong choice entered!Retry");
                     break;
